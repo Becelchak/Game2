@@ -44,8 +44,6 @@ namespace Game
             return c switch
             {
                 'W' => CreateObject("Wall"),
-                'F' => CreateObject("Floor"),
-                'P' => CreateObject("Player"),
                 '.' => null,
                 _ => throw new Exception($"Wrong object{c}")
             };

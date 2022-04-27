@@ -16,7 +16,7 @@ namespace Game
                 ForeColor = Color.Brown,
                 Size = new Size(390,35),
                 TextAlign = ContentAlignment.MiddleCenter,
-                BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg")
+                BackgroundImage = Resource.logoSPC
             };
             var buttonStart = new Button()
             {
@@ -41,13 +41,13 @@ namespace Game
             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
 
-            table.Controls.Add(new Panel() { BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg") },0,0);
-            table.Controls.Add(new Panel() { BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg") }, 1, 0);
+            table.Controls.Add(new Panel() { BackgroundImage = Resource.logoSPC },0,0);
+            table.Controls.Add(new Panel() { BackgroundImage = Resource.logoSPC }, 1, 0);
             table.Controls.Add(gameName, 2, 1);
             table.Controls.Add(buttonStart,2,2);
             table.Controls.Add(buttonExit, 2, 3);
 
-            table.BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg");
+            table.BackgroundImage = Resource.logoSPC;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
 

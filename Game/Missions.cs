@@ -38,14 +38,14 @@ namespace Game
 
             var crush = new PictureBox()
             {
-                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\Crush.gif"),
+                Image = Resource.Crush,
                 Size = new Size(200,150),
                 Location = new Point(100,140)
             };
 
             var terminal = new PictureBox()
             {
-                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\Terminal.jpg"),
+                Image = Resource.Terminal,
                 Size = new Size(238,188),
                 Location = new Point(82,122)
             };
@@ -57,7 +57,7 @@ namespace Game
             Controls.Add(terminal);
 
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg");
+            BackgroundImage = Resource.logoSPC;
             ClientSize = new Size(960, 600);
 
             level1.Click += (sender, args) =>

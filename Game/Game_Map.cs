@@ -8,22 +8,20 @@ namespace Game
     {
         private const string testMap = @"
 WWWWWWWWWWWWWWWWWWWWWWW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFPFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
-WFFFFFFFFFFFFFFFFFFFFFW
+W.....................W
+W.....................W
+W.....................W
+W.....................W
+W.....................W
+W........W............W
+W........W............W
+W........W............W
+W........W............W
+W........W............W
+W........W............W
 WWWWWWWWWWWWWWWWWWWWWWW";
 
         public static IObject[,] Map;
-        public static int HealPoint;
         public static bool IsOver;
 
         public static Keys KeyPressed;
