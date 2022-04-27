@@ -19,7 +19,7 @@ namespace GameModel
                 {
                     var creature = Game_Map.Map[x, y];
                     if (creature == null) continue;
-                    var command = creature.Act(x, y);
+                    var command = creature.Action(x, y);
 
                     if (x + command.DeltaX < 0 || x + command.DeltaX >= Game_Map.MapWidth || y + command.DeltaY < 0 ||
                         y + command.DeltaY >= Game_Map.MapHeight)
@@ -52,7 +52,7 @@ namespace GameModel
             var aliveCandidates = candidates.ToList();
             foreach (var candidate in candidates)
                 foreach (var rival in candidates)
-                    if (rival != candidate && candidate.DeadInConflict(rival))
+                    if (rival != candidate && candidate.CheckOnDeath(rival))
                         aliveCandidates.Remove(candidate);
             if (aliveCandidates.Count > 1)
                 throw new Exception(

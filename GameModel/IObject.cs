@@ -4,7 +4,7 @@
     {
         string GetPathForImage();
         int GetDrawingPriority();
-        ObjectCommand Act(int x, int y);
-        bool DeadInConflict(IObject conflictedObject);
+        ObjectCommand Action(int x, int y);
+        bool CheckOnDeath(IObject conflictedObject);
     }
 }

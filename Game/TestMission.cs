@@ -19,7 +19,6 @@ namespace Game
         private int healPoint;
         private readonly Player player = new Player(new Point(50, 50));
         private readonly int speed = 5;
-        private Point cursor;
         private int tickCount;
         public TestMission(DirectoryInfo imagesDirectory = null)
         {
@@ -34,8 +33,6 @@ namespace Game
             //    graphics.DrawString(healPoint.ToString(), new Font("Arial", 18), Brushes.Red, 1, 1);
             //};
             InitializeComponent();
-
-            var cursor = this.PointToClient(Cursor.Position);
             healPoint = player.HealPoint;
             //SetStyle(ControlStyles.OptimizedDoubleBuffer 
             //         | ControlStyles.AllPaintingInWmPaint 
@@ -56,14 +53,16 @@ namespace Game
         }
         protected override void OnPaint(PaintEventArgs e)
         {
-            var f = new Rectangle(cursor.X - 10, cursor.Y - 10, 100, 100);
+            var cursor = PointToClient(Cursor.Position);
+            var f = new Rectangle(cursor.X - 15, cursor.Y - 15, 20, 20);
+            var g = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\Scoup.png");
             e.Graphics.TranslateTransform(0, GameState.ElementSize);
             foreach (var a in gameState.Animations)
                 e.Graphics.DrawImage(Image.FromFile(a.Creature.GetPathForImage()), a.Location);
             e.Graphics.DrawImage(playerImage, player.Location);
-            e.Graphics.DrawImage(Resource., f);
+            e.Graphics.DrawImage(g, f);
             e.Graphics.ResetTransform();
-            e.Graphics.DrawString(healPoint.ToString(), new Font("Arial", 18), Brushes.Red, 1, 1);
+            e.Graphics.DrawString(healPoint.ToString() + "HP", new Font("Arial", 18), Brushes.Red, 1, 1);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -113,7 +112,7 @@ namespace Game
             var answer = true;
             var playerRadius = new Rectangle(target.X, target.Y, 32, 32);
             foreach (var item in from item in gameState.Animations let wall = new Rectangle(item.Location.X, item.Location.Y, 32,32) 
-                where wall.IntersectsWith(playerRadius) && item.Creature is Wall select item)
+                where wall.IntersectsWith(playerRadius) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass select item)
             {
                 answer = false;
             }

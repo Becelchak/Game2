@@ -43,7 +43,11 @@ namespace Game
         {
             return c switch
             {
-                'W' => CreateObject("Wall"),
+                ')' => CreateObject("WallRight"),
+                '-' => CreateObject("WallUp"),
+                '_' => CreateObject("WallDown"),
+                '(' => CreateObject("WallLeft"),
+                'G' => CreateObject("Glass"),
                 '.' => null,
                 _ => throw new Exception($"Wrong object{c}")
             };

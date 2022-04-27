@@ -1,30 +1,24 @@
-﻿using System.Windows.Forms;
-using System;
-using GameModel;
+﻿using GameModel;
 
 namespace Game
 {
     public class Game_Map
     {
         private const string testMap = @"
-WWWWWWWWWWWWWWWWWWWWWWW
-W.....................W
-W.....................W
-W.....................W
-W.....................W
-W.....................W
-W........W............W
-W........W............W
-W........W............W
-W........W............W
-W........W............W
-W........W............W
-WWWWWWWWWWWWWWWWWWWWWWW";
+_______________________
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+)..........G..........(
+-----------------------";
 
         public static IObject[,] Map;
-        public static bool IsOver;
-
-        public static Keys KeyPressed;
         public static int MapWidth => Map.GetLength(0);
         public static int MapHeight => Map.GetLength(1);
 
