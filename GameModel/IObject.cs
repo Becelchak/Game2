@@ -2,7 +2,7 @@
 {
     public interface IObject
     {
-        string GetImageFileName();
+        string GetPathForImage();
         int GetDrawingPriority();
         ObjectCommand Act(int x, int y);
         bool DeadInConflict(IObject conflictedObject);

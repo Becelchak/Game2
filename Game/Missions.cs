@@ -38,14 +38,14 @@ namespace Game
 
             var crush = new PictureBox()
             {
-                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg"),
+                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\Crush.gif"),
                 Size = new Size(200,150),
                 Location = new Point(100,140)
             };
 
             var terminal = new PictureBox()
             {
-                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg"),
+                Image = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\Terminal.jpg"),
                 Size = new Size(238,188),
                 Location = new Point(82,122)
             };
@@ -59,6 +59,18 @@ namespace Game
             FormBorderStyle = FormBorderStyle.FixedDialog;
             BackgroundImage = Image.FromFile("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources\\logoSPC.jpg");
             ClientSize = new Size(960, 600);
+
+            level1.Click += (sender, args) =>
+            {
+                Game_Map.CreateMap();
+                var f = new TestMission()
+                {
+                    StartPosition = FormStartPosition.Manual,
+                    Location = Location
+                };
+                f.Show();
+                Hide();
+            };
         }
     }
 }

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GameModel;
 
-namespace GameModel
+namespace Game
 {
     public static class MapCreator
     {
@@ -13,7 +14,7 @@ namespace GameModel
         {
             var rows = map.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries);
             if (rows.Select(z => z.Length).Distinct().Count() != 1)
-                throw new Exception($"Wrong test map '{map}'");
+                throw new Exception($"Wrong map '{map}'");
             var result = new IObject[rows[0].Length, rows.Length];
             for (var x = 0; x < rows[0].Length; x++)
                 for (var y = 0; y < rows.Length; y++)
@@ -21,7 +22,7 @@ namespace GameModel
             return result;
         }
 
-        private static IObject CreateCreatureByTypeName(string name)
+        private static IObject CreateObject(string name)
         {
             if (!factory.ContainsKey(name))
             {
@@ -40,15 +41,14 @@ namespace GameModel
 
         private static IObject CreateCreatureBySymbol(char c)
         {
-            switch (c)
+            return c switch
             {
-                case 'W':
-                    return CreateCreatureByTypeName("Wall");
-                case ' ':
-                    return null;
-                default:
-                    throw new Exception($"wrong character for ICreature {c}");
-            }
+                'W' => CreateObject("Wall"),
+                'F' => CreateObject("Floor"),
+                'P' => CreateObject("Player"),
+                '.' => null,
+                _ => throw new Exception($"Wrong object{c}")
+            };
         }
     }
 }
