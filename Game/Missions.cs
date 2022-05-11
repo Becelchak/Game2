@@ -62,8 +62,31 @@ namespace Game
 
             level1.Click += (sender, args) =>
             {
-                Game_Map.CreateMap();
-                var f = new TestMission()
+                Game_Map.CreateMap(Game_Map.pack1.Dequeue());
+                var f = new Mission1(Game_Map.pack1, new Point(50, 50))
+                {
+                    StartPosition = FormStartPosition.Manual,
+                    Location = Location
+                };
+                f.Show();
+                Hide();
+            };
+
+            level2.Click += (sender, args) =>
+            {
+                Game_Map.CreateMap(Game_Map.pack2.Dequeue());
+                var f = new Mission1(Game_Map.pack2, new Point(50, 50))
+                {
+                    StartPosition = FormStartPosition.Manual,
+                    Location = Location
+                };
+                f.Show();
+                Hide();
+            };
+            level3.Click += (sender, args) =>
+            {
+                Game_Map.CreateMap(Game_Map.pack3.Dequeue());
+                var f = new Mission1(Game_Map.pack3, new Point(50, 50))
                 {
                     StartPosition = FormStartPosition.Manual,
                     Location = Location

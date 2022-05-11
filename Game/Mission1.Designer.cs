@@ -1,7 +1,7 @@
 ﻿
 namespace Game
 {
-    partial class TestMission
+    partial class Mission1
     {
         /// <summary>
         /// Required designer variable.
@@ -29,10 +29,18 @@ namespace Game
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // Mission1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Name = "Mission1";
             this.Text = "TestMission";
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

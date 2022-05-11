@@ -18,7 +18,7 @@ namespace Game
             var result = new IObject[rows[0].Length, rows.Length];
             for (var x = 0; x < rows[0].Length; x++)
                 for (var y = 0; y < rows.Length; y++)
-                    result[x, y] = CreateCreatureBySymbol(rows[y][x]);
+                    result[x, y] = CreateObjectBySymbol(rows[y][x]);
             return result;
         }
 
@@ -31,7 +31,7 @@ namespace Game
                     .GetTypes()
                     .FirstOrDefault(z => z.Name == name);
                 if (type == null)
-                    throw new Exception($"Can't find type '{name}'");
+                    throw new Exception($"Can't find object '{name}'");
                 factory[name] = () => (IObject)Activator.CreateInstance(type);
             }
 
@@ -39,15 +39,20 @@ namespace Game
         }
 
 
-        private static IObject CreateCreatureBySymbol(char c)
+        private static IObject CreateObjectBySymbol(char c)
         {
             return c switch
             {
+                'W' => CreateObject("Wall"),
                 ')' => CreateObject("WallRight"),
+                'S' => CreateObject("Shards"),
+                'B' => CreateObject("Blood"),
                 '-' => CreateObject("WallUp"),
                 '_' => CreateObject("WallDown"),
                 '(' => CreateObject("WallLeft"),
                 'G' => CreateObject("Glass"),
+                'D' => CreateObject("Door"),
+                'E' => CreateObject("Exit"),
                 '.' => null,
                 _ => throw new Exception($"Wrong object{c}")
             };
