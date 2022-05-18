@@ -165,7 +165,7 @@ namespace Game
 
         public bool CheckOnDeath(IObject conflictedObject)
         {
-            return true;
+            return conflictedObject != this;
         }
 
         public int GetDrawingPriority()
