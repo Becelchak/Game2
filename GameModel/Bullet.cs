@@ -5,7 +5,7 @@ namespace GameModel
 {
     public class Bullet
     {
-        private readonly int Speed = 20;
+        private const int Speed = 20;
         private Point Start;
         private Point End;
         public Point Location;

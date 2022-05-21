@@ -8,7 +8,7 @@ namespace GameModel
     {
         public readonly int HealPoint = 100;
 
-        public int Ammo = 15;
+        private int Ammo = 15;
 
         public Point Location;
 
@@ -16,6 +16,9 @@ namespace GameModel
         {
             this.Location = Location;
         }
+
+        public int ShowAmmo() => Ammo;
+        public void SpendAmmo() => --Ammo; 
 
         public void Reload()
         {

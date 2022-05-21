@@ -3,9 +3,9 @@ using GameModel;
 
 namespace Game
 {
-    public class Game_Map
+    public static class GameMap
     {
-        public const string Map1_1 = @"
+        private const string Mission1Map1 = @"
 _______________________
 )..........G..........(
 )..........G..........(
@@ -18,7 +18,8 @@ _______________________
 )..........G..........(
 )..........G..........(
 -----------------------";
-        public const string Map1_2 = @"
+
+        private const string Mission1Map2 = @"
 _______________________
 )..........G..........(
 )..........G..........(
@@ -39,7 +40,8 @@ _______________________
 )..........(..........(
 )..D.......(..........(
 --...------------------";
-        public const string Map1_3 = @"
+
+        private const string Mission1Map3 = @"
 ________________...____
 )..........G.....E....(
 ).....B....S..........(
@@ -62,7 +64,7 @@ ________________...____
 ).....................(
 --...------------------";
 
-        public const string Map2_1 = @"
+        private const string Mission2Map1 = @"
 ___________GGGGGGGGGGG_____________________
 ).........(...........)...................(
 ).........(...........)...................(
@@ -76,7 +78,8 @@ ___________GGGGGGGGGGG_____________________
 ).......)..................(..............(
 )..D....)..................(..............(
 --...--------------------------------------";
-        public const string Map2_2 = @"
+
+        private const string Mission2Map2 = @"
 ______________________________________...__
 )......................................D..(
 ).........................................(
@@ -92,7 +95,8 @@ G.........................................(
 ).......).................................(
 ).......).................................(
 --...--------------------------------------";
-        public const string Map2_3 = @"
+
+        private const string Mission2Map3 = @"
 ______________________________________...__
 ).........................................(
 ).........................................(
@@ -115,8 +119,10 @@ ______________________________________...__
 ).......................................E.(
 ---------------------------------------...-";
 
-        public const string Map3_1 = @"
+        private const string Mission3Map1 = @"
 ___________GGGGGGGGG_______GGGGGGGGG_______
+).........................................(
+).........................................(
 ).........................................(
 )...............W---...---W...............(
 )...............(.........)...............(
@@ -126,21 +132,24 @@ ___________GGGGGGGGG_______GGGGGGGGG_______
 ).........................................(
 ).........................................(
 -------------------------------------------";
-        public const string Map3_2 = @"
+
+        private const string Mission3Map2 = @"
 ___________________________________________
+)...).................................(...(
+)...).................................(...(
 )...).................................(...(
 )...)...........W---...---W...........(...(
 )...W---G.......(.........).......G---W...(
-).......G.......(.........).......S........
+).......S.......(.........).......S........
 ).......S.......W___...___W.......S......E.
 )...W___G.........................G___W...(
 )...).................................(...(
 )...).................................(...(
 -------------------------------------------";
 
-        public static Queue<string> pack1 = FullPack(new Queue<string>(), Map1_1, Map1_2, Map1_3);
-        public static Queue<string> pack2 = FullPack(new Queue<string>(), Map2_1, Map2_2, Map2_3);
-        public static Queue<string> pack3 = FullPack(new Queue<string>(), Map3_1, Map3_2);
+        public static readonly Queue<string> pack1 = FullPack(new Queue<string>(), Mission1Map1, Mission1Map2, Mission1Map3);
+        public static readonly Queue<string> pack2 = FullPack(new Queue<string>(), Mission2Map1, Mission2Map2, Mission2Map3);
+        public static readonly Queue<string> pack3 = FullPack(new Queue<string>(), Mission3Map1, Mission3Map2);
 
         public static IObject[,] Map;
         public static int MapWidth => Map.GetLength(0);
@@ -151,7 +160,7 @@ ___________________________________________
             Map = MapCreator.CreateMap(map);
         }
 
-        public static Queue<string> FullPack(Queue<string> pack, params string[] map)
+        private static Queue<string> FullPack(Queue<string> pack, params string[] map)
         {
             foreach (var item in map)
             {

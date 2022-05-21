@@ -24,16 +24,14 @@ namespace Game
 
         private static IObject CreateObject(string name)
         {
-            if (!factory.ContainsKey(name))
-            {
-                var type = Assembly
-                    .GetExecutingAssembly()
-                    .GetTypes()
-                    .FirstOrDefault(z => z.Name == name);
-                if (type == null)
-                    throw new Exception($"Can't find object '{name}'");
-                factory[name] = () => (IObject)Activator.CreateInstance(type);
-            }
+            if (factory.ContainsKey(name)) return factory[name]();
+            var type = Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .FirstOrDefault(z => z.Name == name);
+            if (type == null)
+                throw new Exception($"Can't find object '{name}'");
+            factory[name] = () => (IObject)Activator.CreateInstance(type);
 
             return factory[name]();
         }

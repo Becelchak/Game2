@@ -1,7 +1,7 @@
 ﻿
 namespace Game
 {
-    partial class Missions
+    sealed partial class Missions
     {
         /// <summary>
         /// Required designer variable.

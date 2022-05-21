@@ -1,13 +1,16 @@
 ﻿using System.Drawing;
+using System.IO;
+using System.Media;
 using System.Windows.Forms;
 
 namespace Game
 {
-    public partial class Missions : Form
+    public sealed partial class Missions : Form
     {
         public Missions()
         {
             InitializeComponent();
+            Directory.SetCurrentDirectory("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources");
             var level1 = new LinkLabel()
             {
                 Text = "Миссия 1",
@@ -62,8 +65,9 @@ namespace Game
 
             level1.Click += (sender, args) =>
             {
-                Game_Map.CreateMap(Game_Map.pack1.Dequeue());
-                var f = new Mission1(Game_Map.pack1, new Point(50, 50))
+                GameMap.CreateMap(GameMap.pack1.Dequeue());
+                var f = new MissionBase(GameMap.pack1, new Point(50, 50), "Mission1", 
+                    Resource.Enemy1, Resource.Dead1, 3, new SoundPlayer(Path.GetFullPath("die1.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
                     Location = Location
@@ -74,8 +78,9 @@ namespace Game
 
             level2.Click += (sender, args) =>
             {
-                Game_Map.CreateMap(Game_Map.pack2.Dequeue());
-                var f = new Mission1(Game_Map.pack2, new Point(50, 50))
+                GameMap.CreateMap(GameMap.pack2.Dequeue());
+                var f = new MissionBase(GameMap.pack2, new Point(50, 50), "Mission2", 
+                    Resource.Enemy2, Resource.Dead2, 2, new SoundPlayer(Path.GetFullPath("die2.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
                     Location = Location
@@ -85,8 +90,9 @@ namespace Game
             };
             level3.Click += (sender, args) =>
             {
-                Game_Map.CreateMap(Game_Map.pack3.Dequeue());
-                var f = new Mission1(Game_Map.pack3, new Point(50, 50))
+                GameMap.CreateMap(GameMap.pack3.Dequeue());
+                var f = new MissionBase(GameMap.pack3, new Point(50, 50), "Mission3", 
+                    Resource.Enemy3, Resource.Dead3, 1, new SoundPlayer(Path.GetFullPath("die3.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
                     Location = Location

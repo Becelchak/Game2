@@ -10,15 +10,18 @@ using Keys = System.Windows.Forms.Keys;
 
 namespace Game
 {
-    public partial class Mission2 : Form
+    public partial class MissionBase : Form
     {
         private readonly GameState gameState;
         private readonly Image playerImage = Resource.Player;
-        private readonly Image enemyImage = Resource.Enemy2;
+        private readonly Image enemyImage;
+        private readonly Image enemyBody;
         private readonly Queue<string> levels;
         private readonly string next_map;
+        private readonly string nameMission;
 
         private readonly List<Enemy> enemys = new();
+        private readonly int enemyTier;
         private readonly List<Bullet> bullets = new();
         private readonly SoundPlayer soundShoot;
         private readonly SoundPlayer soundReload;
@@ -34,9 +37,13 @@ namespace Game
         private static bool isSPressed;
         private static bool isDPressed;
         private static readonly Keys[] moveKey = { Keys.A, Keys.S, Keys.W, Keys.D };
-        public Mission2(Queue<string> maps, Point playerLocation, DirectoryInfo imagesDirectory = null)
+        public MissionBase(Queue<string> maps, Point playerLocation, string name, Image enemyLive, Image enemyDead, int enemyTier, SoundPlayer soundDie = null, DirectoryInfo imagesDirectory = null)
         {
             InitializeComponent();
+            nameMission = name;
+            enemyImage = enemyLive;
+            enemyBody = enemyDead;
+            this.enemyTier = enemyTier;
             player = new Player(playerLocation);
             levels = maps;
             if (levels.Count != 0)
@@ -44,7 +51,7 @@ namespace Game
             Directory.SetCurrentDirectory("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources");
             soundShoot = new SoundPlayer(Path.GetFullPath("Shoot.wav"));
             soundReload = new SoundPlayer(Path.GetFullPath("Reload.wav"));
-            soundDieEnemy = new SoundPlayer(Path.GetFullPath("die1.wav"));
+            soundDieEnemy = soundDie;
             soundImpact = new SoundPlayer(Path.GetFullPath("impact.wav"));
 
             healPoint = player.HealPoint;
@@ -56,7 +63,7 @@ namespace Game
             FormBorderStyle = FormBorderStyle.FixedDialog;
             BackgroundImage = Resource.Floor;
 
-            enemys.Add(new Enemy(new Point(80, 80), 2));
+            enemys.Add(new Enemy(new Point(95, 95), enemyTier));
 
             var timer = new Timer();
             timer.Interval = 20;
@@ -80,11 +87,11 @@ namespace Game
                 }
                 if (enemy.ShowDeath())
                 {
-                    soundDieEnemy.Play();
+                    soundDieEnemy?.Play();
                     enemy.BackDeath();
                 }
                 e.Graphics.DrawImage(enemy.HealPoint > 0 ? enemyImage
-                    : Resource.Dead2, enemy.Location);
+                    : enemyBody, enemy.Location);
             }
             e.Graphics.DrawImage(playerImage, player.Location);
             e.Graphics.ResetTransform();
@@ -95,7 +102,7 @@ namespace Game
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            Text = "Mission2";
+            Text = nameMission;
             DoubleBuffered = true;
         }
         private void TimerTick(object sender, EventArgs args)
@@ -176,7 +183,7 @@ namespace Game
                         item.Creature.CheckOnDeath(item.Creature);
                         GameMap.CreateMap(next_map);
                         enemys.Clear();
-                        new Mission1(levels, player.Location).Show();
+                        new MissionBase(levels, player.Location, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
                         Hide();
                         break;
                     case Exit:

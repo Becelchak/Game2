@@ -14,16 +14,21 @@ namespace Game
     {
         private readonly GameState gameState;
         private readonly Image playerImage = Resource.Player;
+        private readonly Image enemyImage = Resource.Enemy3;
         private readonly Queue<string> levels;
         private readonly string next_map;
 
-        private readonly List<Bullet> bullets = new List<Bullet>();
-        private SoundPlayer soundShoot;
-        private SoundPlayer soundReload;
+        private readonly List<Enemy> enemys = new();
+        private readonly List<Bullet> bullets = new();
+        private readonly SoundPlayer soundShoot;
+        private readonly SoundPlayer soundReload;
+        private readonly SoundPlayer soundDieEnemy;
+        private readonly SoundPlayer soundImpact;
+
 
         private int healPoint;
         private readonly Player player;
-        private readonly int speed = 8;
+        private const int speed = 8;
         private static bool isAPressed;
         private static bool isWPressed;
         private static bool isSPressed;
@@ -39,15 +44,19 @@ namespace Game
             Directory.SetCurrentDirectory("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources");
             soundShoot = new SoundPlayer(Path.GetFullPath("Shoot.wav"));
             soundReload = new SoundPlayer(Path.GetFullPath("Reload.wav"));
+            soundDieEnemy = new SoundPlayer(Path.GetFullPath("die1.wav"));
+            soundImpact = new SoundPlayer(Path.GetFullPath("impact.wav"));
+
             healPoint = player.HealPoint;
             Cursor = new Cursor("Scoup.cur");
-
             gameState = new GameState();
             ClientSize = new Size(
-                GameState.ElementSize * Game_Map.MapWidth,
-                GameState.ElementSize * Game_Map.MapHeight + GameState.ElementSize);
+                GameState.ElementSize * GameMap.MapWidth,
+                GameState.ElementSize * GameMap.MapHeight + GameState.ElementSize);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             BackgroundImage = Resource.Floor;
+
+            enemys.Add(new Enemy(new Point(80, 80), 1));
 
             var timer = new Timer();
             timer.Interval = 20;
@@ -60,13 +69,28 @@ namespace Game
             foreach (var a in gameState.Animations)
                 e.Graphics.DrawImage(a.Creature.GetImage(), a.Location);
             foreach (var bullet in bullets.Where(bullet => !bullet.stop))
-            {
                 e.Graphics.DrawImage(bullet.TypeBullet, bullet.Location);
+            foreach (var enemy in enemys)
+            {
+                enemy.CheckImpact(bullets);
+                if (enemy.ShowImpact())
+                {
+                    soundImpact.Play();
+                    enemy.BackImpact();
+                }
+                if (enemy.ShowDeath())
+                {
+                    soundDieEnemy.Play();
+                    enemy.BackDeath();
+                }
+                e.Graphics.DrawImage(enemy.HealPoint > 0 ? enemyImage
+                    : Resource.Dead3, enemy.Location);
             }
             e.Graphics.DrawImage(playerImage, player.Location);
             e.Graphics.ResetTransform();
-            e.Graphics.DrawString(healPoint + "HP", new Font("Arial", 18), Brushes.Red, 1, 1);
-            e.Graphics.DrawString(player.Ammo + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
+            e.Graphics.DrawString(healPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
+            e.Graphics.DrawString(player.ShowAmmo() + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
+            e.Graphics.DrawString(enemys[0].HealPoint + " HP", new Font("Arial", 18), Brushes.Red, 125, 1);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -151,7 +175,8 @@ namespace Game
                 {
                     case Door:
                         item.Creature.CheckOnDeath(item.Creature);
-                        Game_Map.CreateMap(next_map);
+                        GameMap.CreateMap(next_map);
+                        enemys.Clear();
                         new Mission1(levels, player.Location).Show();
                         Hide();
                         break;
@@ -164,6 +189,14 @@ namespace Game
                 }
                 break;
             }
+
+            foreach (var enemy in from enemy in enemys
+                                  let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32)
+                                  where radius.IntersectsWith(playerRadius)
+                                  select enemy)
+            {
+                answer = false;
+            }
             return answer;
         }
 
@@ -173,6 +206,7 @@ namespace Game
             if (moveKey.Contains(e.KeyCode))
                 MovePlayer(true, e.KeyCode);
             if (e.KeyCode != Keys.R) return;
+            bullets.Clear();
             soundReload.Play();
             player.Reload();
         }
@@ -186,14 +220,14 @@ namespace Game
 
         private void OnMouseClick(Object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left || player.Ammo <= 0) return;
+            if (e.Button != MouseButtons.Left || player.ShowAmmo() <= 0) return;
             var point = e.Location;
             var b = new Bullet(player.Location, point)
             {
                 TypeBullet = Resource.Bullet
             };
             bullets.Add(b);
-            --player.Ammo;
+            player.SpendAmmo();
             soundShoot.Play();
         }
     }
