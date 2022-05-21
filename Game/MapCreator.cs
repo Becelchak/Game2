@@ -8,7 +8,7 @@ namespace Game
 {
     public static class MapCreator
     {
-        private static readonly Dictionary<string, Func<IObject>> factory = new Dictionary<string, Func<IObject>>();
+        private static readonly Dictionary<string, Func<IObject>> factory = new();
 
         public static IObject[,] CreateMap(string map, string separator = "\r\n")
         {
@@ -51,6 +51,8 @@ namespace Game
                 'G' => CreateObject("Glass"),
                 'D' => CreateObject("Door"),
                 'E' => CreateObject("Exit"),
+                'Z' => CreateObject("ZoneEnemy"),
+                'M' => CreateObject("Medkit"),
                 '.' => null,
                 _ => throw new Exception($"Wrong object{c}")
             };

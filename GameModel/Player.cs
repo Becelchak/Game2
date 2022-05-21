@@ -6,15 +6,17 @@ namespace GameModel
 {
     public class Player
     {
-        public readonly int HealPoint = 100;
+        public int HealPoint;
 
-        private int Ammo = 15;
+        private int Ammo ;
 
         public Point Location;
 
-        public Player(Point Location)
+        public Player(Point Location, int HealPoint, int Ammo)
         {
             this.Location = Location;
+            this.HealPoint = HealPoint;
+            this.Ammo = Ammo;
         }
 
         public int ShowAmmo() => Ammo;
@@ -23,6 +25,11 @@ namespace GameModel
         public void Reload()
         {
             Ammo = 15;
+        }
+
+        public int GetHealPoint()
+        {
+            return HealPoint + 40;
         }
     }
 }

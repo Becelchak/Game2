@@ -42,6 +42,10 @@ namespace GameModel
             }
 
         }
+        //private bool TurnOnHuntingInstinct(int distanceX, int distanceY)
+        //{
+
+        //}
 
     }
 }

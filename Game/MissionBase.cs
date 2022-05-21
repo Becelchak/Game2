@@ -12,21 +12,22 @@ namespace Game
 {
     public partial class MissionBase : Form
     {
-        private readonly GameState gameState;
+        private GameState gameState;
         private readonly Image playerImage = Resource.Player;
         private readonly Image enemyImage;
         private readonly Image enemyBody;
         private readonly Queue<string> levels;
-        private readonly string next_map;
+        private readonly string nextMap;
         private readonly string nameMission;
 
-        private readonly List<Enemy> enemys = new();
+        private readonly List<Enemy> enemyList = new();
         private readonly int enemyTier;
         private readonly List<Bullet> bullets = new();
         private readonly SoundPlayer soundShoot;
         private readonly SoundPlayer soundReload;
         private readonly SoundPlayer soundDieEnemy;
         private readonly SoundPlayer soundImpact;
+        private readonly SoundPlayer soundMedkit;
 
 
         private int healPoint;
@@ -44,15 +45,16 @@ namespace Game
             enemyImage = enemyLive;
             enemyBody = enemyDead;
             this.enemyTier = enemyTier;
-            player = new Player(playerLocation);
+            player = new Player(playerLocation,100,15);
             levels = maps;
             if (levels.Count != 0)
-                next_map = levels.Dequeue();
+                nextMap = levels.Dequeue();
             Directory.SetCurrentDirectory("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources");
             soundShoot = new SoundPlayer(Path.GetFullPath("Shoot.wav"));
             soundReload = new SoundPlayer(Path.GetFullPath("Reload.wav"));
             soundDieEnemy = soundDie;
             soundImpact = new SoundPlayer(Path.GetFullPath("impact.wav"));
+            soundMedkit = new SoundPlayer(Path.GetFullPath("medshot4.wav"));
 
             healPoint = player.HealPoint;
             Cursor = new Cursor("Scoup.cur");
@@ -62,8 +64,10 @@ namespace Game
                 GameState.ElementSize * GameMap.MapHeight + GameState.ElementSize);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             BackgroundImage = Resource.Floor;
-
-            enemys.Add(new Enemy(new Point(95, 95), enemyTier));
+            
+            gameState.BeginAct();
+            foreach (var state in gameState.Animations.Where(state => state.Creature is ZoneEnemy))
+                enemyList.Add(new Enemy(state.Location, enemyTier));
 
             var timer = new Timer();
             timer.Interval = 20;
@@ -74,10 +78,10 @@ namespace Game
         {
             e.Graphics.TranslateTransform(0, GameState.ElementSize);
             foreach (var a in gameState.Animations)
-                e.Graphics.DrawImage(a.Creature.GetImage(), a.Location);
+                e.Graphics.DrawImage(a.Creature.GetDrawingPriority() != -1 ? a.Creature.GetImage() : Resource.Floor1, a.Location);
             foreach (var bullet in bullets.Where(bullet => !bullet.stop))
                 e.Graphics.DrawImage(bullet.TypeBullet, bullet.Location);
-            foreach (var enemy in enemys)
+            foreach (var enemy in enemyList)
             {
                 enemy.CheckImpact(bullets);
                 if (enemy.ShowImpact())
@@ -109,7 +113,9 @@ namespace Game
         {
             gameState.BeginAct();
             foreach (var e in gameState.Animations)
+            {
                 e.Location = new Point(e.Location.X, e.Location.Y);
+            }
             foreach (var bullet in bullets
                 .Where(bullet => bullet.Location.Y <= ClientSize.Height
                                  || bullet.Location.X <= ClientSize.Width))
@@ -174,20 +180,28 @@ namespace Game
             var playerRadius = new Rectangle(target.X, target.Y, 32, 32);
             foreach (var item in from item in gameState.Animations
                                  let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32)
-                                 where wall.IntersectsWith(playerRadius) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Door or Exit or Wall
+                                 where wall.IntersectsWith(playerRadius) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Door or Exit or Wall or Medkit
                                  select item)
             {
                 switch (item.Creature)
                 {
                     case Door:
                         item.Creature.CheckOnDeath(item.Creature);
-                        GameMap.CreateMap(next_map);
-                        enemys.Clear();
+                        GameMap.CreateMap(nextMap);
+                        enemyList.Clear();
                         new MissionBase(levels, player.Location, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
                         Hide();
                         break;
                     case Exit:
                         Close();
+                        break;
+                    case Medkit:
+                        if(item.Creature.GetDrawingPriority() != -1)
+                        {
+                            item.Creature.CheckOnDeath(item.Creature);
+                            player.HealPoint = Math.Min(100, player.HealPoint + 40);
+                            soundMedkit.Play();
+                        }
                         break;
                     default:
                         answer = false;
@@ -196,9 +210,9 @@ namespace Game
                 break;
             }
 
-            foreach (var enemy in from enemy in enemys
+            foreach (var enemy in from enemy in enemyList
                                   let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32)
-                                  where radius.IntersectsWith(playerRadius)
+                                  where radius.IntersectsWith(playerRadius) && enemy.HealPoint > 0
                                   select enemy)
             {
                 answer = false;
@@ -228,7 +242,7 @@ namespace Game
         {
             if (e.Button != MouseButtons.Left || player.ShowAmmo() <= 0) return;
             var point = e.Location;
-            var b = new Bullet(player.Location, point)
+            var b = new Bullet(player.Location, point, 20)
             {
                 TypeBullet = Resource.Bullet
             };

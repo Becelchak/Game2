@@ -5,17 +5,18 @@ namespace GameModel
 {
     public class Bullet
     {
-        private const int Speed = 20;
-        private Point Start;
-        private Point End;
+        private readonly int Speed;
+        private readonly Point Start;
+        private readonly Point End;
         public Point Location;
         public Image TypeBullet;
         public bool stop;
 
-        public Bullet(Point start, Point end)
+        public Bullet(Point start, Point end, int speed)
         {
             Start = start;
             End = end;
+            Speed = speed;
             Location = Start;
         }
 

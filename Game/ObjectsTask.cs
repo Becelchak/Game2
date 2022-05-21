@@ -6,11 +6,6 @@ namespace Game
 {
     class Wall : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -25,11 +20,6 @@ namespace Game
     }
     class Shards : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -44,11 +34,6 @@ namespace Game
     }
     class Blood : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -63,11 +48,6 @@ namespace Game
     }
     class WallUp : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -82,11 +62,6 @@ namespace Game
     }
     class WallDown : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -101,11 +76,6 @@ namespace Game
     }
     class WallRight : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -120,11 +90,6 @@ namespace Game
     }
     class WallLeft : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -139,11 +104,6 @@ namespace Game
     }
     class Glass : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -158,11 +118,6 @@ namespace Game
     }
     class Door : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return conflictedObject != this;
@@ -180,11 +135,6 @@ namespace Game
     }
     class Exit : IObject
     {
-        public ObjectCommand Action(int x, int y)
-        {
-            return new ObjectCommand() { DeltaX = 0, DeltaY = 0 };
-        }
-
         public bool CheckOnDeath(IObject conflictedObject)
         {
             return true;
@@ -198,6 +148,42 @@ namespace Game
         public Bitmap GetImage()
         {
            return Resource.Exit;
+        }
+    }
+    class ZoneEnemy : IObject
+    {
+        public bool CheckOnDeath(IObject conflictedObject)
+        {
+            return true;
+        }
+
+        public int GetDrawingPriority()
+        {
+            return 1;
+        }
+
+        public Bitmap GetImage()
+        {
+            return Resource.Floor1;
+        }
+    }
+    class Medkit : IObject
+    {
+        private int IsUsed;
+        public bool CheckOnDeath(IObject conflictedObject)
+        {
+            IsUsed = -1;
+            return conflictedObject is Medkit;
+        }
+
+        public int GetDrawingPriority()
+        {
+            return IsUsed;
+        }
+
+        public Bitmap GetImage()
+        {
+            return Resource.Medkit;
         }
     }
 }

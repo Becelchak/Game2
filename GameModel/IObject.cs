@@ -6,7 +6,6 @@ namespace GameModel
     {
         Bitmap GetImage();
         int GetDrawingPriority();
-        ObjectCommand Action(int x, int y);
         bool CheckOnDeath(IObject conflictedObject);
     }
 }

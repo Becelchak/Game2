@@ -19,19 +19,11 @@ namespace GameModel
                 {
                     var creature = GameMap.Map[x, y];
                     if (creature == null) continue;
-                    var command = creature.Action(x, y);
-
-                    if (x + command.DeltaX < 0 || x + command.DeltaX >= GameMap.MapWidth || y + command.DeltaY < 0 ||
-                        y + command.DeltaY >= GameMap.MapHeight)
-                        throw new Exception($"The object {creature.GetType()} falls out of the game field");
-
                     Animations.Add(
                         new Animation
                         {
-                            Command = command,
                             Creature = creature,
                             Location = new Point(x * ElementSize, y * ElementSize),
-                            TargetLogicalLocation = new Point(x + command.DeltaX, y + command.DeltaY)
                         });
                 }
 
