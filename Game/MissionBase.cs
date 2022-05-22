@@ -157,7 +157,6 @@ namespace Game
         }
         private void TimerTick(object sender, EventArgs args)
         {
-            gameState.BeginAct();
             foreach (var e in gameState.Animations)
             {
                 e.Location = new Point(e.Location.X, e.Location.Y);
