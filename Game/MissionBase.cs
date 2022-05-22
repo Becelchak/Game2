@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Timers;
 using System.Windows.Forms;
 using GameModel;
 using Keys = System.Windows.Forms.Keys;
+using Timer = System.Windows.Forms.Timer;
 
 namespace Game
 {
     public partial class MissionBase : Form
     {
         private GameState gameState;
-        private readonly Image playerImage = Resource.Player;
+        private Image playerImage = Resource.Player;
         private readonly Image enemyImage;
         private readonly Image enemyBody;
         private readonly Queue<string> levels;
@@ -23,6 +26,7 @@ namespace Game
         private readonly List<Enemy> enemyList = new();
         private readonly int enemyTier;
         private readonly List<Bullet> bullets = new();
+        private readonly List<Point> medkits = new();
         private readonly SoundPlayer soundShoot;
         private readonly SoundPlayer soundReload;
         private readonly SoundPlayer soundDieEnemy;
@@ -38,14 +42,18 @@ namespace Game
         private static bool isSPressed;
         private static bool isDPressed;
         private static readonly Keys[] moveKey = { Keys.A, Keys.S, Keys.W, Keys.D };
-        public MissionBase(Queue<string> maps, Point playerLocation, string name, Image enemyLive, Image enemyDead, int enemyTier, SoundPlayer soundDie = null, DirectoryInfo imagesDirectory = null)
+
+        private PointF CursorMouse;
+        private float AnglePlayer;
+
+        public MissionBase(Queue<string> maps, Player player, string name, Image enemyLive, Image enemyDead, int enemyTier, SoundPlayer soundDie = null, DirectoryInfo imagesDirectory = null)
         {
             InitializeComponent();
             nameMission = name;
             enemyImage = enemyLive;
             enemyBody = enemyDead;
             this.enemyTier = enemyTier;
-            player = new Player(playerLocation,100,15);
+            this.player = player;
             levels = maps;
             if (levels.Count != 0)
                 nextMap = levels.Dequeue();
@@ -67,18 +75,28 @@ namespace Game
             
             gameState.BeginAct();
             foreach (var state in gameState.Animations.Where(state => state.Creature is ZoneEnemy))
-                enemyList.Add(new Enemy(state.Location, enemyTier));
+                enemyList.Add(new Enemy(state.Location, enemyTier, 6));
+            foreach (var state in gameState.Animations.Where(state => state.Creature is Medkit))
+                medkits.Add(state.Location);
 
             var timer = new Timer();
             timer.Interval = 20;
             timer.Tick += TimerTick;
             timer.Start();
+
+            MouseMove += (_, e) =>
+            {
+                CursorMouse = new PointF(e.Location.X, e.Location.Y);
+                Invalidate();
+            };
         }
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.TranslateTransform(0, GameState.ElementSize);
-            foreach (var a in gameState.Animations)
-                e.Graphics.DrawImage(a.Creature.GetDrawingPriority() != -1 ? a.Creature.GetImage() : Resource.Floor1, a.Location);
+            foreach (var animation in gameState.Animations)
+                e.Graphics.DrawImage(animation.Creature.GetImage(), animation.Location);
+            foreach (var medkit in medkits)
+                e.Graphics.DrawImage(Resource.Medkit, medkit);
             foreach (var bullet in bullets.Where(bullet => !bullet.stop))
                 e.Graphics.DrawImage(bullet.TypeBullet, bullet.Location);
             foreach (var enemy in enemyList)
@@ -97,12 +115,40 @@ namespace Game
                 e.Graphics.DrawImage(enemy.HealPoint > 0 ? enemyImage
                     : enemyBody, enemy.Location);
             }
-            e.Graphics.DrawImage(playerImage, player.Location);
+            switch (healPoint)
+            {
+                case > 0:
+                    playerImage = Rotate(e, playerImage);
+                    e.Graphics.DrawImage(playerImage, player.Location);
+                    e.Graphics.DrawEllipse(new Pen(Color.Brown),new Rectangle(player.Location,new Size(32,32)));
+                    break;
+                case < 0:
+                    player.Location = new Point(0, 0);
+                    player.SetDeath();
+                    break;
+            }
             e.Graphics.ResetTransform();
-            e.Graphics.DrawString(healPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
+            if(player.ShowDeath())
+                e.Graphics.DrawString("Миссия провалена", new Font("Arial", 32), Brushes.Red, 100, 100);
+            e.Graphics.DrawString(player.HealPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
             e.Graphics.DrawString(player.ShowAmmo() + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
         }
+        private void ChangeAngle()
+        {
+            //var vector = Math.Sqrt((player.Location.X - CursorMouse.X) * (player.Location.X - CursorMouse.X) +
+                                   //(player.Location.Y - CursorMouse.Y) * (player.Location.Y - CursorMouse.Y));
+            AnglePlayer = (float)Math.Atan2( player.Location.Y - CursorMouse.Y, player.Location.X - CursorMouse.X);
+            //AnglePlayer = (float)Math.Atan(vector);
+        }
 
+        private Image Rotate(PaintEventArgs e, Image img)
+        {
+            ChangeAngle(); // создаем новый угол
+            e.Graphics.TranslateTransform(player.Location.X, player.Location.Y); // перемещение в picturebox
+            e.Graphics.RotateTransform((float)(AnglePlayer * 180/ Math.PI)); // угол вращения (Переменная RotationAngle)
+            e.Graphics.TranslateTransform(-player.Location.X, -player.Location.Y); // задаем точку вокруг которой осуществляется вращение
+            return img; // проецируем изображение
+        }
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -122,6 +168,20 @@ namespace Game
             {
                 bullet.Move();
             }
+            var playerRadius = new Rectangle(player.Location.X, player.Location.Y, 32, 32);
+            foreach (var enemy in from enemy in enemyList
+                where enemy.HealPoint > 0 && CanMoveEnemy(enemy.TryMoveEnemy(player.Location), enemy)
+                                  select enemy)
+            {
+                var radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32);
+                if(!playerRadius.IntersectsWith(radius))
+                    enemy.MoveEnemy(player.Location);
+                else if (playerRadius.IntersectsWith(radius))
+                {
+                    healPoint = player.TakeDamage();
+                }
+            }
+
             if (isAPressed) MovePlayer(isAPressed, Keys.A);
             if (isWPressed) MovePlayer(isWPressed, Keys.W);
             if (isSPressed) MovePlayer(isSPressed, Keys.S);
@@ -186,21 +246,23 @@ namespace Game
                 switch (item.Creature)
                 {
                     case Door:
-                        item.Creature.CheckOnDeath(item.Creature);
                         GameMap.CreateMap(nextMap);
                         enemyList.Clear();
-                        new MissionBase(levels, player.Location, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
+                        bullets.Clear();
+                        player.HealPoint = healPoint;
+                        new MissionBase(levels, player, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
                         Hide();
                         break;
                     case Exit:
                         Close();
                         break;
                     case Medkit:
-                        if(item.Creature.GetDrawingPriority() != -1)
+                        if(medkits.Contains(item.Location))
                         {
-                            item.Creature.CheckOnDeath(item.Creature);
-                            player.HealPoint = Math.Min(100, player.HealPoint + 40);
+                            healPoint = Math.Min(100, player.GetHealPoint());
+                            player.HealPoint = healPoint;
                             soundMedkit.Play();
+                            medkits.Remove(item.Location);
                         }
                         break;
                     default:
@@ -220,6 +282,29 @@ namespace Game
             return answer;
         }
 
+        private bool CanMoveEnemy(Point? target, Enemy self)
+        {
+            var answer = true;
+            if (target == null) return false;
+            var enemyradius = new Rectangle(self.Location.X, self.Location.Y, 32, 32);
+            foreach (var item in from item in gameState.Animations
+                                 let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32)
+                                 where enemyradius.IntersectsWith(wall) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Wall
+                                 select item)
+            {
+                answer = false;
+                break;
+            }
+            foreach (var enemy in from enemy in enemyList
+                                  let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32)
+                                  where radius.IntersectsWith(enemyradius) && enemy.HealPoint > 0 && enemy != self
+                                  select enemy)
+            {
+                answer = false;
+                break;
+            }
+            return answer;
+        }
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);

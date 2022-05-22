@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 
 namespace GameModel
 {
@@ -8,7 +10,8 @@ namespace GameModel
     {
         public Point Location;
         private readonly int Tier;
-        public int HealPoint = 100;
+        public int HealPoint;
+        private readonly int Speed;
         private bool IsDeath;
         private bool IsImpact;
 
@@ -16,10 +19,12 @@ namespace GameModel
         public bool ShowImpact() => IsImpact;
         public void BackImpact() => IsImpact = false;
         public void BackDeath() => IsDeath = false;
-        public Enemy(Point Location, int tier)
+        public Enemy(Point Location, int tier, int speed)
         {
             this.Location = Location;
             Tier = tier;
+            HealPoint = 100;
+            Speed = speed;
         }
 
         public void CheckImpact(List<Bullet> bullets)
@@ -34,7 +39,7 @@ namespace GameModel
                 {
                     if (HealPoint - (10 * Tier) < 0)
                         IsDeath = true;
-                    HealPoint -= 10 * Tier;
+                    HealPoint -= 15 * Tier;
                     IsImpact = true;
                 }
                 bullets.Remove(bullet);
@@ -42,10 +47,32 @@ namespace GameModel
             }
 
         }
-        //private bool TurnOnHuntingInstinct(int distanceX, int distanceY)
-        //{
+        public void MoveEnemy(Point player)
+        {
+            var vector = Math.Sqrt((player.X - Location.X) * (player.X - Location.X) +
+                                   (player.Y - Location.Y) * (player.Y - Location.Y));
+            if (!(vector < 200)) return;
+            var distanceX = player.X - Location.X;
+            var distanceY = player.Y - Location.Y;
+            var newX = distanceX / vector * Speed + Location.X;
+            var newY = distanceY / vector * Speed + Location.Y;
+            var newPos = new Point((int)newX, (int)newY);
+            Location = newPos;
+        }
 
-        //}
+        public Point? TryMoveEnemy(Point player)
+        {
+            var vector = Math.Sqrt((player.X - Location.X) * (player.X - Location.X) +
+                                   (player.Y - Location.Y) * (player.Y - Location.Y));
+            Point? newPos = null;
+            if (!(vector < 280)) return newPos;
+            var distanceX = player.X - Location.X;
+            var distanceY = player.Y - Location.Y;
+            var newX = distanceX / vector * Speed + Location.X;
+            var newY = distanceY / vector * Speed + Location.Y;
+            newPos = new Point((int)newX, (int)newY);
 
+            return newPos;
+        }
     }
 }

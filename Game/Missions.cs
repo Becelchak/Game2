@@ -2,6 +2,7 @@
 using System.IO;
 using System.Media;
 using System.Windows.Forms;
+using GameModel;
 
 namespace Game
 {
@@ -62,11 +63,12 @@ namespace Game
             FormBorderStyle = FormBorderStyle.FixedDialog;
             BackgroundImage = Resource.logoSPC;
             ClientSize = new Size(960, 600);
+            var player = new Player(new Point(80, 80), 100, 15);
 
             level1.Click += (sender, args) =>
             {
                 GameMap.CreateMap(GameMap.pack1.Dequeue());
-                var f = new MissionBase(GameMap.pack1, new Point(50, 50), "Mission1", 
+                var f = new MissionBase(GameMap.pack1, player, "Mission1", 
                     Resource.Enemy1, Resource.Dead1, 3, new SoundPlayer(Path.GetFullPath("die1.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
@@ -79,7 +81,7 @@ namespace Game
             level2.Click += (sender, args) =>
             {
                 GameMap.CreateMap(GameMap.pack2.Dequeue());
-                var f = new MissionBase(GameMap.pack2, new Point(50, 50), "Mission2", 
+                var f = new MissionBase(GameMap.pack2, player, "Mission2", 
                     Resource.Enemy2, Resource.Dead2, 2, new SoundPlayer(Path.GetFullPath("die2.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
@@ -91,7 +93,7 @@ namespace Game
             level3.Click += (sender, args) =>
             {
                 GameMap.CreateMap(GameMap.pack3.Dequeue());
-                var f = new MissionBase(GameMap.pack3, new Point(50, 50), "Mission3", 
+                var f = new MissionBase(GameMap.pack3, player, "Mission3", 
                     Resource.Enemy3, Resource.Dead3, 1, new SoundPlayer(Path.GetFullPath("die3.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,

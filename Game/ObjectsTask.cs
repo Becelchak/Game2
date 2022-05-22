@@ -120,7 +120,7 @@ namespace Game
     {
         public bool CheckOnDeath(IObject conflictedObject)
         {
-            return conflictedObject != this;
+            return conflictedObject == this;
         }
 
         public int GetDrawingPriority()
@@ -169,21 +169,19 @@ namespace Game
     }
     class Medkit : IObject
     {
-        private int IsUsed;
         public bool CheckOnDeath(IObject conflictedObject)
         {
-            IsUsed = -1;
             return conflictedObject is Medkit;
         }
 
         public int GetDrawingPriority()
         {
-            return IsUsed;
+            return 0;
         }
 
         public Bitmap GetImage()
         {
-            return Resource.Medkit;
+            return Resource.Floor1; ;
         }
     }
 }
