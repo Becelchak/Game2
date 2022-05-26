@@ -135,19 +135,16 @@ namespace Game
         }
         private void ChangeAngle()
         {
-            //var vector = Math.Sqrt((player.Location.X - CursorMouse.X) * (player.Location.X - CursorMouse.X) +
-                                   //(player.Location.Y - CursorMouse.Y) * (player.Location.Y - CursorMouse.Y));
             AnglePlayer = (float)Math.Atan2( player.Location.Y - CursorMouse.Y, player.Location.X - CursorMouse.X);
-            //AnglePlayer = (float)Math.Atan(vector);
         }
 
         private Image Rotate(PaintEventArgs e, Image img)
         {
-            ChangeAngle(); // создаем новый угол
-            e.Graphics.TranslateTransform(player.Location.X, player.Location.Y); // перемещение в picturebox
-            e.Graphics.RotateTransform((float)(AnglePlayer * 180/ Math.PI)); // угол вращения (Переменная RotationAngle)
-            e.Graphics.TranslateTransform(-player.Location.X, -player.Location.Y); // задаем точку вокруг которой осуществляется вращение
-            return img; // проецируем изображение
+            ChangeAngle(); 
+            e.Graphics.TranslateTransform(player.Location.X, player.Location.Y);
+            e.Graphics.RotateTransform((float)(AnglePlayer * 180/ Math.PI));
+            e.Graphics.TranslateTransform(-player.Location.X, -player.Location.Y); 
+            return img; 
         }
         protected override void OnLoad(EventArgs e)
         {
@@ -249,8 +246,8 @@ namespace Game
                         enemyList.Clear();
                         bullets.Clear();
                         player.HealPoint = healPoint;
-                        new MissionBase(levels, player, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
                         Hide();
+                        new MissionBase(levels, player, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
                         break;
                     case Exit:
                         Close();
