@@ -6,11 +6,12 @@ namespace GameModel
     public class Bullet
     {
         private readonly int Speed;
-        private readonly Point Start;
-        private readonly Point End;
+        private Point Start;
+        private Point End;
         public Point Location;
         public Image TypeBullet;
         public bool stop;
+        public readonly float angle;
 
         public Bullet(Point start, Point end, int speed)
         {
@@ -18,6 +19,7 @@ namespace GameModel
             End = end;
             Speed = speed;
             Location = Start;
+            angle = (float)Math.Atan2(End.Y - Start.Y, End.X - Start.X);
         }
 
         public void Move()

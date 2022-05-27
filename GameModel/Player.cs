@@ -7,7 +7,7 @@ namespace GameModel
     public class Player
     {
         public int HealPoint;
-
+        public float AnglePlayer;
         private int Ammo ;
 
         public Point Location;

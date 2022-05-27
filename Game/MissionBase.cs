@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Timers;
 using System.Windows.Forms;
 using GameModel;
 using Keys = System.Windows.Forms.Keys;
@@ -13,10 +13,10 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace Game
 {
-    public partial class MissionBase : Form
+    public sealed partial class MissionBase : Form
     {
         private GameState gameState;
-        private Image playerImage = Resource.Player;
+        private Image playerImage = Resource.Player2;
         private readonly Image enemyImage;
         private readonly Image enemyBody;
         private readonly Queue<string> levels;
@@ -36,7 +36,7 @@ namespace Game
 
         private int healPoint;
         private readonly Player player;
-        private const int speed = 8;
+        private const int Speed = 8;
         private static bool isAPressed;
         private static bool isWPressed;
         private static bool isSPressed;
@@ -44,7 +44,6 @@ namespace Game
         private static readonly Keys[] moveKey = { Keys.A, Keys.S, Keys.W, Keys.D };
 
         private PointF CursorMouse;
-        private float AnglePlayer;
 
         public MissionBase(Queue<string> maps, Player player, string name, Image enemyLive, Image enemyDead, int enemyTier, SoundPlayer soundDie = null, DirectoryInfo imagesDirectory = null)
         {
@@ -90,6 +89,7 @@ namespace Game
                 Invalidate();
             };
         }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.TranslateTransform(0, GameState.ElementSize);
@@ -98,7 +98,8 @@ namespace Game
             foreach (var medkit in medkits)
                 e.Graphics.DrawImage(Resource.Medkit, medkit);
             foreach (var bullet in bullets.Where(bullet => !bullet.stop))
-                e.Graphics.DrawImage(bullet.TypeBullet, bullet.Location);
+                e.Graphics.DrawImage(RotateBullet(e, bullet.TypeBullet, bullet), bullet.Location);
+            e.Graphics.ResetTransform();
             foreach (var enemy in enemyList)
             {
                 enemy.CheckImpact(bullets);
@@ -120,31 +121,45 @@ namespace Game
                 case > 0:
                     playerImage = Rotate(e, playerImage);
                     e.Graphics.DrawImage(playerImage, player.Location);
-                    e.Graphics.DrawEllipse(new Pen(Color.Brown),new Rectangle(player.Location,new Size(32,32)));
                     break;
                 case < 0:
                     player.Location = new Point(0, 0);
                     player.SetDeath();
                     break;
             }
+            e.Graphics.DrawEllipse(new Pen(Color.Brown), new Rectangle(player.Location, new Size(32, 32)));
             e.Graphics.ResetTransform();
             if(player.ShowDeath())
-                e.Graphics.DrawString("Миссия провалена", new Font("Arial", 32), Brushes.Red, 100, 100);
+            {
+                var g = new Point(ClientSize.Width / 2,
+                                ClientSize.Height / 2);
+                var h = new Rectangle(g, new Size(400, 70));
+                e.Graphics.DrawRectangle(new Pen(Color.Black,15f), h);
+                e.Graphics.FillRectangle(Brushes.DarkGray,h);
+                e.Graphics.DrawString("Миссия провалена", new Font("Arial", 32), Brushes.Red, g);
+            }
             e.Graphics.DrawString(player.HealPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
             e.Graphics.DrawString(player.ShowAmmo() + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
         }
+
         private void ChangeAngle()
         {
-            AnglePlayer = (float)Math.Atan2( player.Location.Y - CursorMouse.Y, player.Location.X - CursorMouse.X);
+            player.AnglePlayer = (float)Math.Atan2( player.Location.Y - CursorMouse.Y, player.Location.X - CursorMouse.X);
         }
-
         private Image Rotate(PaintEventArgs e, Image img)
         {
-            ChangeAngle(); 
-            e.Graphics.TranslateTransform(player.Location.X, player.Location.Y);
-            e.Graphics.RotateTransform((float)(AnglePlayer * 180/ Math.PI));
-            e.Graphics.TranslateTransform(-player.Location.X, -player.Location.Y); 
+            ChangeAngle();
+            e.Graphics.TranslateTransform((float)img.Width / 2 + player.Location.X , (float)img.Height / 2  + player.Location.Y);
+            e.Graphics.RotateTransform((float)(player.AnglePlayer * 180/ Math.PI));
+            e.Graphics.TranslateTransform((float)-img.Width / 2 - player.Location.X, (float)-img.Height / 2  - player.Location.Y); 
             return img; 
+        }
+        private static Image RotateBullet(PaintEventArgs e, Image img, Bullet b)
+        {
+            e.Graphics.TranslateTransform((float)img.Width / 2 + b.Location.X, (float)img.Height / 2 + b.Location.Y);
+            e.Graphics.RotateTransform((float)(b.angle * 180 / Math.PI));
+            e.Graphics.TranslateTransform((float)-img.Width / 2 - b.Location.X, (float)-img.Height / 2 - b.Location.Y);
+            return img;
         }
         protected override void OnLoad(EventArgs e)
         {
@@ -152,6 +167,7 @@ namespace Game
             Text = nameMission;
             DoubleBuffered = true;
         }
+
         private void TimerTick(object sender, EventArgs args)
         {
             foreach (var e in gameState.Animations)
@@ -190,50 +206,50 @@ namespace Game
             switch (e)
             {
                 case Keys.W:
-                    if (CanMove(new Point(newPoint.X, newPoint.Y - speed)))
+                    if (CanMove(new Point(newPoint.X, newPoint.Y - Speed)))
                     {
-                        player.Location = new Point(newPoint.X, newPoint.Y - speed);
+                        player.Location = new Point(newPoint.X, newPoint.Y - Speed);
                         isWPressed = keyValue;
                     }
                     else
                         isWPressed = false;
                     break;
                 case Keys.A:
-                    if (CanMove(new Point(newPoint.X - speed, newPoint.Y)))
+                    if (CanMove(new Point(newPoint.X - Speed, newPoint.Y)))
                     {
-                        player.Location = new Point(newPoint.X - speed, newPoint.Y);
+                        player.Location = new Point(newPoint.X - Speed, newPoint.Y);
                         isAPressed = keyValue;
                     }
                     else
                         isAPressed = false;
                     break;
                 case Keys.S:
-                    if (CanMove(new Point(newPoint.X, newPoint.Y + speed)))
+                    if (CanMove(new Point(newPoint.X, newPoint.Y + Speed)))
                     {
-                        player.Location = new Point(newPoint.X, newPoint.Y + speed);
+                        player.Location = new Point(newPoint.X, newPoint.Y + Speed);
                         isSPressed = keyValue;
                     }
                     else
                         isSPressed = false;
                     break;
                 case Keys.D:
-                    if (CanMove(new Point(newPoint.X + speed, newPoint.Y)))
+                    if (CanMove(new Point(newPoint.X + Speed, newPoint.Y)))
                     {
-                        player.Location = new Point(newPoint.X + speed, newPoint.Y);
+                        player.Location = new Point(newPoint.X + Speed, newPoint.Y);
                         isDPressed = keyValue;
                     }
                     else
                         isDPressed = false;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(e), e, "Неизвестная команда");
+                    throw new ArgumentOutOfRangeException(nameof(e), e, @"Неизвестная команда");
             }
         }
 
         private bool CanMove(Point target)
         {
             var answer = true;
-            var playerRadius = new Rectangle(target.X, target.Y, 32, 32);
+            var playerRadius = new Rectangle(target.X, target.Y - 40, 32, 32);
             foreach (var item in from item in gameState.Animations
                                  let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32)
                                  where wall.IntersectsWith(playerRadius) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Door or Exit or Wall or Medkit
@@ -243,11 +259,15 @@ namespace Game
                 {
                     case Door:
                         GameMap.CreateMap(nextMap);
-                        enemyList.Clear();
-                        bullets.Clear();
-                        player.HealPoint = healPoint;
-                        Hide();
-                        new MissionBase(levels, player, nameMission, enemyImage,enemyBody, enemyTier, soundDieEnemy).Show();
+                        if(enemyList.Count > 0)
+                        {
+                            enemyList.Clear();
+                            bullets.Clear();
+                            player.HealPoint = healPoint;
+                            new MissionBase(levels, player, nameMission, enemyImage, enemyBody, enemyTier,
+                                soundDieEnemy).Show();
+                            Hide();
+                        }
                         break;
                     case Exit:
                         Close();
@@ -280,24 +300,19 @@ namespace Game
 
         private bool CanMoveEnemy(Point? target, Enemy self)
         {
-            var answer = true;
             if (target == null) return false;
-            var enemyradius = new Rectangle(self.Location.X, self.Location.Y, 32, 32);
-            foreach (var item in from item in gameState.Animations
-                                 let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32)
-                                 where enemyradius.IntersectsWith(wall) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Wall
-                                 select item)
+            var enemyRadius = new Rectangle(self.Location.X, self.Location.Y, 32, 32);
+            var answer = !(from item in gameState.Animations 
+                let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32) 
+                where enemyRadius.IntersectsWith(wall) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Wall 
+                select item)
+                .Any();
+            if ((from enemy in enemyList
+                let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 16, 16)
+                where radius.IntersectsWith(enemyRadius) && enemy.HealPoint > 0 && enemy != self
+                select enemy).Any())
             {
                 answer = false;
-                break;
-            }
-            foreach (var enemy in from enemy in enemyList
-                                  let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32)
-                                  where radius.IntersectsWith(enemyradius) && enemy.HealPoint > 0 && enemy != self
-                                  select enemy)
-            {
-                answer = false;
-                break;
             }
             return answer;
         }

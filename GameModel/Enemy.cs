@@ -37,7 +37,7 @@ namespace GameModel
             {
                 if (HealPoint > 0)
                 {
-                    if (HealPoint - (10 * Tier) < 0)
+                    if (HealPoint - (15 * Tier) < 0)
                         IsDeath = true;
                     HealPoint -= 15 * Tier;
                     IsImpact = true;
@@ -51,7 +51,7 @@ namespace GameModel
         {
             var vector = Math.Sqrt((player.X - Location.X) * (player.X - Location.X) +
                                    (player.Y - Location.Y) * (player.Y - Location.Y));
-            if (!(vector < 200)) return;
+            if (!(vector < 280)) return;
             var distanceX = player.X - Location.X;
             var distanceY = player.Y - Location.Y;
             var newX = distanceX / vector * Speed + Location.X;
