@@ -9,11 +9,16 @@ namespace GameModel
     public class Enemy
     {
         public Point Location;
+        private Point NextPoint;
+        public Point SpawnPoint;
         private readonly int Tier;
         public int HealPoint;
         private readonly int Speed;
+        public int trying;
         private bool IsDeath;
         private bool IsImpact;
+        public bool GoPlayer = true;
+        public bool GoSpawn;
 
         public bool ShowDeath() => IsDeath;
         public bool ShowImpact() => IsImpact;
@@ -22,6 +27,7 @@ namespace GameModel
         public Enemy(Point Location, int tier, int speed)
         {
             this.Location = Location;
+            SpawnPoint = Location;
             Tier = tier;
             HealPoint = 100;
             Speed = speed;
@@ -37,7 +43,7 @@ namespace GameModel
             {
                 if (HealPoint > 0)
                 {
-                    if (HealPoint - (15 * Tier) < 0)
+                    if (HealPoint - 15 * Tier < 0)
                         IsDeath = true;
                     HealPoint -= 15 * Tier;
                     IsImpact = true;
@@ -51,28 +57,37 @@ namespace GameModel
         {
             var vector = Math.Sqrt((player.X - Location.X) * (player.X - Location.X) +
                                    (player.Y - Location.Y) * (player.Y - Location.Y));
-            if (!(vector < 280)) return;
-            var distanceX = player.X - Location.X;
-            var distanceY = player.Y - Location.Y;
-            var newX = distanceX / vector * Speed + Location.X;
-            var newY = distanceY / vector * Speed + Location.Y;
-            var newPos = new Point((int)newX, (int)newY);
-            Location = newPos;
+            if (!(vector < 380 && vector != 0)) return;
+
+            Location = NextPoint;
         }
 
         public Point? TryMoveEnemy(Point player)
         {
             var vector = Math.Sqrt((player.X - Location.X) * (player.X - Location.X) +
                                    (player.Y - Location.Y) * (player.Y - Location.Y));
-            Point? newPos = null;
-            if (!(vector < 280)) return newPos;
+            if (!(vector < 380)) return null;
             var distanceX = player.X - Location.X;
             var distanceY = player.Y - Location.Y;
             var newX = distanceX / vector * Speed + Location.X;
             var newY = distanceY / vector * Speed + Location.Y;
-            newPos = new Point((int)newX, (int)newY);
+            if (new Point((int) newX, (int) newY) == new Point(0, 0)) return null;
+            NextPoint = new Point((int) newX, (int) newY);
+            return NextPoint;
+        }
 
-            return newPos;
+        public void RefreshTarget()
+        {
+            if (GoPlayer && !GoSpawn)
+            {
+                GoPlayer = false;
+                GoSpawn = true;
+            }
+            else
+            {
+                GoPlayer = true;
+                GoSpawn = false;
+            }
         }
     }
 }

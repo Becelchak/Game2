@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Threading;
 using System.Windows.Forms;
 using GameModel;
 using Keys = System.Windows.Forms.Keys;
@@ -74,7 +73,7 @@ namespace Game
             
             gameState.BeginAct();
             foreach (var state in gameState.Animations.Where(state => state.Creature is ZoneEnemy))
-                enemyList.Add(new Enemy(state.Location, enemyTier, 6));
+                enemyList.Add(new Enemy(state.Location, enemyTier, 4));
             foreach (var state in gameState.Animations.Where(state => state.Creature is Medkit))
                 medkits.Add(state.Location);
 
@@ -127,16 +126,16 @@ namespace Game
                     player.SetDeath();
                     break;
             }
-            e.Graphics.DrawEllipse(new Pen(Color.Brown), new Rectangle(player.Location, new Size(32, 32)));
+            //e.Graphics.DrawEllipse(new Pen(Color.Brown), new Rectangle(player.Location, new Size(32, 32)));
             e.Graphics.ResetTransform();
             if(player.ShowDeath())
             {
-                var g = new Point(ClientSize.Width / 2,
-                                ClientSize.Height / 2);
-                var h = new Rectangle(g, new Size(400, 70));
-                e.Graphics.DrawRectangle(new Pen(Color.Black,15f), h);
-                e.Graphics.FillRectangle(Brushes.DarkGray,h);
-                e.Graphics.DrawString("Миссия провалена", new Font("Arial", 32), Brushes.Red, g);
+                var location = new Point(ClientSize.Width / 4,
+                                ClientSize.Height / 4);
+                var back = new Rectangle(location, new Size(400, 70));
+                e.Graphics.DrawRectangle(new Pen(Color.Black,15f), back);
+                e.Graphics.FillRectangle(Brushes.DarkGray, back);
+                e.Graphics.DrawString("Миссия провалена", new Font("Arial", 32), Brushes.Red, location);
             }
             e.Graphics.DrawString(player.HealPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
             e.Graphics.DrawString(player.ShowAmmo() + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
@@ -182,15 +181,29 @@ namespace Game
             }
             var playerRadius = new Rectangle(player.Location.X, player.Location.Y, 32, 32);
             foreach (var enemy in from enemy in enemyList
-                where enemy.HealPoint > 0 && CanMoveEnemy(enemy.TryMoveEnemy(player.Location), enemy)
-                                  select enemy)
+                where enemy.HealPoint > 0
+                select enemy)
             {
                 var radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32);
-                if(!playerRadius.IntersectsWith(radius))
-                    enemy.MoveEnemy(player.Location);
-                else if (playerRadius.IntersectsWith(radius))
+                switch (playerRadius.IntersectsWith(radius))
                 {
-                    healPoint = player.TakeDamage();
+                    case false when CanMoveEnemy(enemy.TryMoveEnemy(player.Location), enemy) && enemy.GoPlayer:
+                        enemy.MoveEnemy(player.Location);
+                        break;
+                    case false when !CanMoveEnemy(enemy.TryMoveEnemy(enemy.SpawnPoint), enemy) && !enemy.GoSpawn:
+                    {
+                        enemy.MoveEnemy(enemy.SpawnPoint);
+                        break;
+                    }
+                    default:
+                    {
+                        if (playerRadius.IntersectsWith(radius))
+                        {
+                            healPoint = player.TakeDamage();
+                        }
+
+                        break;
+                    }
                 }
             }
 
@@ -301,18 +314,39 @@ namespace Game
         private bool CanMoveEnemy(Point? target, Enemy self)
         {
             if (target == null) return false;
+
             var enemyRadius = new Rectangle(self.Location.X, self.Location.Y, 32, 32);
             var answer = !(from item in gameState.Animations 
                 let wall = new Rectangle(item.Location.X, item.Location.Y, 32, 32) 
-                where enemyRadius.IntersectsWith(wall) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Wall 
+                where wall.IntersectsWith(enemyRadius) && item.Creature is WallDown or WallLeft or WallRight or WallUp or Glass or Wall 
                 select item)
                 .Any();
             if ((from enemy in enemyList
-                let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 16, 16)
+                let radius = new Rectangle(enemy.Location.X, enemy.Location.Y, 32, 32)
                 where radius.IntersectsWith(enemyRadius) && enemy.HealPoint > 0 && enemy != self
                 select enemy).Any())
             {
                 answer = false;
+            }
+            if (!answer && self.trying < 500)
+            {
+                self.trying++;
+                self.RefreshTarget();
+            }
+            //else if (answer)
+            //{
+            //    self.trying--;
+            //}
+            //else if (self.trying >= 0)
+            //    self.trying++;
+            else if (!answer && self.trying == 5)
+            {
+                self.trying = 0;
+                self.RefreshTarget();
+            }
+            else if(answer)
+            {
+                self.trying = 0;
             }
             return answer;
         }
@@ -332,8 +366,6 @@ namespace Game
             if (moveKey.Contains(e.KeyCode))
                 MovePlayer(false, e.KeyCode);
         }
-
-
         private void OnMouseClick(Object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || player.ShowAmmo() <= 0) return;
