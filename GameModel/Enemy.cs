@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 
 namespace GameModel
 {
@@ -14,11 +13,12 @@ namespace GameModel
         private readonly int Tier;
         public int HealPoint;
         private readonly int Speed;
-        public int trying;
+        public int TryingMove;
         private bool IsDeath;
         private bool IsImpact;
         public bool GoPlayer = true;
         public bool GoSpawn;
+        public float angle;
 
         public bool ShowDeath() => IsDeath;
         public bool ShowImpact() => IsImpact;
@@ -88,6 +88,11 @@ namespace GameModel
                 GoPlayer = true;
                 GoSpawn = false;
             }
+        }
+
+        public void ChangeAngle(Player player)
+        {
+            angle = (float)Math.Atan2(Location.Y - player.Location.Y, Location.X - player.Location.X);
         }
     }
 }

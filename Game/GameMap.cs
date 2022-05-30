@@ -151,9 +151,9 @@ ___________________________________________
 )...S.....M.M.....Z..M.M.........Z....S...(
 -------------------------------------------";
 
-        public static readonly Queue<string> pack1 = FullPack(new Queue<string>(), Mission1Map1, Mission1Map2, Mission1Map3);
-        public static readonly Queue<string> pack2 = FullPack(new Queue<string>(), Mission2Map1, Mission2Map2, Mission2Map3);
-        public static readonly Queue<string> pack3 = FullPack(new Queue<string>(), Mission3Map1, Mission3Map2);
+        public static readonly Queue<string> Pack1 = FullPack(new Queue<string>(), Mission1Map1, Mission1Map2, Mission1Map3);
+        public static readonly Queue<string> Pack2 = FullPack(new Queue<string>(), Mission2Map1, Mission2Map2, Mission2Map3);
+        public static readonly Queue<string> Pack3 = FullPack(new Queue<string>(), Mission3Map1, Mission3Map2);
 
         public static IObject[,] Map;
         public static int MapWidth => Map.GetLength(0);

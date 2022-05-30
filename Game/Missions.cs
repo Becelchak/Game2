@@ -65,10 +65,10 @@ namespace Game
             ClientSize = new Size(960, 600);
             var player = new Player(new Point(80, 80), 100, 15);
 
-            level1.Click += (sender, args) =>
+            level1.Click += (_, _) =>
             {
-                GameMap.CreateMap(GameMap.pack1.Dequeue());
-                var f = new MissionBase(GameMap.pack1, player, "Mission1", 
+                GameMap.CreateMap(GameMap.Pack1.Dequeue());
+                var f = new MissionBase(GameMap.Pack1, player, "Mission1", 
                     Resource.Enemy1, Resource.Dead1, 3, new SoundPlayer(Path.GetFullPath("die1.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
@@ -78,10 +78,10 @@ namespace Game
                 Hide();
             };
 
-            level2.Click += (sender, args) =>
+            level2.Click += (_, _) =>
             {
-                GameMap.CreateMap(GameMap.pack2.Dequeue());
-                var f = new MissionBase(GameMap.pack2, player, "Mission2", 
+                GameMap.CreateMap(GameMap.Pack2.Dequeue());
+                var f = new MissionBase(GameMap.Pack2, player, "Mission2", 
                     Resource.Enemy2, Resource.Dead2, 2, new SoundPlayer(Path.GetFullPath("die2.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,
@@ -90,10 +90,10 @@ namespace Game
                 f.Show();
                 Hide();
             };
-            level3.Click += (sender, args) =>
+            level3.Click += (_, _) =>
             {
-                GameMap.CreateMap(GameMap.pack3.Dequeue());
-                var f = new MissionBase(GameMap.pack3, player, "Mission3", 
+                GameMap.CreateMap(GameMap.Pack3.Dequeue());
+                var f = new MissionBase(GameMap.Pack3, player, "Mission3", 
                     Resource.Enemy3, Resource.Dead3, 1, new SoundPlayer(Path.GetFullPath("die3.wav")))
                 {
                     StartPosition = FormStartPosition.Manual,

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace GameModel
@@ -8,7 +7,7 @@ namespace GameModel
     {
         public int HealPoint;
         public float AnglePlayer;
-        private int Ammo ;
+        private int Ammo;
 
         public Point Location;
         private bool IsDead;
@@ -37,6 +36,10 @@ namespace GameModel
         public int TakeDamage()
         {
             return HealPoint -=1;
+        }
+        public void ChangeAngle(PointF CursorMouse)
+        {
+            AnglePlayer = (float)Math.Atan2(Location.Y - CursorMouse.Y, Location.X - CursorMouse.X);
         }
     }
 }

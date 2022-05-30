@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Threading;
 using System.Windows.Forms;
 using GameModel;
 using Keys = System.Windows.Forms.Keys;
@@ -15,7 +14,7 @@ namespace Game
     public sealed partial class MissionBase : Form
     {
         private GameState gameState;
-        private Image playerImage = Resource.Player2;
+        private Image playerImage = Resource.Player;
         private readonly Image enemyImage;
         private readonly Image enemyBody;
         private readonly Queue<string> levels;
@@ -34,7 +33,7 @@ namespace Game
 
 
         private int healPoint;
-        private readonly Player player;
+        private static Player player;
         private const int Speed = 8;
         private static bool isAPressed;
         private static bool isWPressed;
@@ -51,10 +50,11 @@ namespace Game
             enemyImage = enemyLive;
             enemyBody = enemyDead;
             this.enemyTier = enemyTier;
-            this.player = player;
+            MissionBase.player = player;
             levels = maps;
             if (levels.Count != 0)
                 nextMap = levels.Dequeue();
+            // Требуется настроить до запуска игры на новом компьютере
             Directory.SetCurrentDirectory("C:\\Users\\kost4\\source\\repos\\Rep\\Game\\Resources");
             soundShoot = new SoundPlayer(Path.GetFullPath("Shoot.wav"));
             soundReload = new SoundPlayer(Path.GetFullPath("Reload.wav"));
@@ -97,7 +97,7 @@ namespace Game
             foreach (var medkit in medkits)
                 e.Graphics.DrawImage(Resource.Medkit, medkit);
             foreach (var bullet in bullets.Where(bullet => !bullet.stop))
-                e.Graphics.DrawImage(RotateBullet(e, bullet.TypeBullet, bullet), bullet.Location);
+                e.Graphics.DrawImage(RotateObject(e, bullet.TypeBullet, bullet), bullet.Location);
             e.Graphics.ResetTransform();
             foreach (var enemy in enemyList)
             {
@@ -112,8 +112,9 @@ namespace Game
                     soundDieEnemy?.Play();
                     enemy.BackDeath();
                 }
-                e.Graphics.DrawImage(enemy.HealPoint > 0 ? enemyImage
+                e.Graphics.DrawImage(enemy.HealPoint > 0 ? RotateObject(e, enemyImage, enemy)
                     : enemyBody, enemy.Location);
+                e.Graphics.ResetTransform();
             }
             switch (healPoint)
             {
@@ -126,7 +127,6 @@ namespace Game
                     player.SetDeath();
                     break;
             }
-            //e.Graphics.DrawEllipse(new Pen(Color.Brown), new Rectangle(player.Location, new Size(32, 32)));
             e.Graphics.ResetTransform();
             if(player.ShowDeath())
             {
@@ -140,24 +140,28 @@ namespace Game
             e.Graphics.DrawString(player.HealPoint + " HP", new Font("Arial", 18), Brushes.Red, 1, 1);
             e.Graphics.DrawString(player.ShowAmmo() + " Ammo", new Font("Arial", 18), Brushes.Orange, 85, 1);
         }
-
-        private void ChangeAngle()
-        {
-            player.AnglePlayer = (float)Math.Atan2( player.Location.Y - CursorMouse.Y, player.Location.X - CursorMouse.X);
-        }
         private Image Rotate(PaintEventArgs e, Image img)
         {
-            ChangeAngle();
+            player.ChangeAngle(CursorMouse);
             e.Graphics.TranslateTransform((float)img.Width / 2 + player.Location.X , (float)img.Height / 2  + player.Location.Y);
             e.Graphics.RotateTransform((float)(player.AnglePlayer * 180/ Math.PI));
             e.Graphics.TranslateTransform((float)-img.Width / 2 - player.Location.X, (float)-img.Height / 2  - player.Location.Y); 
             return img; 
         }
-        private static Image RotateBullet(PaintEventArgs e, Image img, Bullet b)
+        private static Image RotateObject(PaintEventArgs e, Image img, Bullet b)
         {
             e.Graphics.TranslateTransform((float)img.Width / 2 + b.Location.X, (float)img.Height / 2 + b.Location.Y);
             e.Graphics.RotateTransform((float)(b.angle * 180 / Math.PI));
             e.Graphics.TranslateTransform((float)-img.Width / 2 - b.Location.X, (float)-img.Height / 2 - b.Location.Y);
+            return img;
+        }
+
+        private static Image RotateObject(PaintEventArgs e, Image img, Enemy enemy)
+        {
+            enemy.ChangeAngle(player);
+            e.Graphics.TranslateTransform((float)img.Width / 2 + enemy.Location.X, (float)img.Height / 2 + enemy.Location.Y);
+            e.Graphics.RotateTransform((float)(enemy.angle * 180 / Math.PI));
+            e.Graphics.TranslateTransform((float)-img.Width / 2 - enemy.Location.X, (float)-img.Height / 2 - enemy.Location.Y);
             return img;
         }
         protected override void OnLoad(EventArgs e)
@@ -328,25 +332,19 @@ namespace Game
             {
                 answer = false;
             }
-            if (!answer && self.trying < 500)
+            switch (answer)
             {
-                self.trying++;
-                self.RefreshTarget();
-            }
-            //else if (answer)
-            //{
-            //    self.trying--;
-            //}
-            //else if (self.trying >= 0)
-            //    self.trying++;
-            else if (!answer && self.trying == 5)
-            {
-                self.trying = 0;
-                self.RefreshTarget();
-            }
-            else if(answer)
-            {
-                self.trying = 0;
+                case false when self.TryingMove < 500:
+                    self.TryingMove++;
+                    self.RefreshTarget();
+                    break;
+                case false when self.TryingMove == 5:
+                    self.TryingMove = 0;
+                    self.RefreshTarget();
+                    break;
+                case true:
+                    self.TryingMove = 0;
+                    break;
             }
             return answer;
         }
@@ -366,7 +364,7 @@ namespace Game
             if (moveKey.Contains(e.KeyCode))
                 MovePlayer(false, e.KeyCode);
         }
-        private void OnMouseClick(Object sender, MouseEventArgs e)
+        private void OnMouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || player.ShowAmmo() <= 0) return;
             var point = e.Location;
