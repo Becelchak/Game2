@@ -39,23 +39,37 @@ namespace Game
 
         private static IObject CreateObjectBySymbol(char c)
         {
-            return c switch
+            switch (c)
             {
-                'W' => CreateObject("Wall"),
-                ')' => CreateObject("WallRight"),
-                'S' => CreateObject("Shards"),
-                'B' => CreateObject("Blood"),
-                '-' => CreateObject("WallUp"),
-                '_' => CreateObject("WallDown"),
-                '(' => CreateObject("WallLeft"),
-                'G' => CreateObject("Glass"),
-                'D' => CreateObject("Door"),
-                'E' => CreateObject("Exit"),
-                'Z' => CreateObject("ZoneEnemy"),
-                'M' => CreateObject("Medkit"),
-                '.' => null,
-                _ => throw new Exception($"Wrong object{c}")
-            };
+                case 'W':
+                    return CreateObject("Wall");
+                case ')':
+                    return CreateObject("WallRight");
+                case 'S':
+                    return CreateObject("Shards");
+                case 'B':
+                    return CreateObject("Blood");
+                case '-':
+                    return CreateObject("WallUp");
+                case '_':
+                    return CreateObject("WallDown");
+                case '(':
+                    return CreateObject("WallLeft");
+                case 'G':
+                    return CreateObject("Glass");
+                case 'D':
+                    return CreateObject("Door");
+                case 'E':
+                    return CreateObject("Exit");
+                case 'Z':
+                    return CreateObject("ZoneEnemy");
+                case 'M':
+                    return CreateObject("Medkit");
+                case '.':
+                    return null;
+                default:
+                    throw new Exception($"Wrong object{c}. Ошибка при считывании карты");
+            }
         }
     }
 }
